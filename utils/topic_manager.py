@@ -50,3 +50,8 @@ def add_message(topic_id, role, message):
                 "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
             })
     save_topics(data)
+
+
+def ensure_topic_store():
+    """Public helper to ensure topic file exists; safe to call at startup."""
+    _ensure_topic_file()

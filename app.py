@@ -6,8 +6,8 @@ import streamlit as st
 
 # Backend imports (do not modify backend logic)
 from core.llm import call_llm
-from utils.topic_manager import create_topic, add_message, load_topics, save_topics
-from utils.memory_manager import append_message as update_memory
+from utils.topic_manager import create_topic, add_message, load_topics, save_topics, ensure_topic_store
+from utils.memory_manager import append_message as update_memory, ensure_memory_store
 
 # Paths
 STUDENT_PROMPT_FILE = Path("agents/student.txt")
@@ -17,6 +17,10 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 
 # Page config
 st.set_page_config(page_title="Student–Teacher AI", page_icon="🎓", layout="wide")
+
+# Ensure data stores exist before any access (important for fresh deployments)
+ensure_topic_store()
+ensure_memory_store()
 
 # Session defaults
 for key, default in {
@@ -160,6 +164,8 @@ def list_uploaded_pdfs():
 
 
 def start_topic(topic: str, max_turns: int):
+    ensure_topic_store()
+    ensure_memory_store()
     st.session_state.topic_id = create_topic(topic, max_turns)
     st.session_state.topic = topic
     st.session_state.max_turns = max_turns

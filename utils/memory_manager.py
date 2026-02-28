@@ -46,3 +46,8 @@ def append_message(role, message):
 
 def get_turn_count():
     return len(_safe_load()["conversation"])
+
+
+def ensure_memory_store():
+    """Public helper to ensure memory file exists; safe to call at startup."""
+    _ensure_memory_file()
