@@ -106,7 +106,7 @@ def apply_theme(dark_mode: bool):
                 --card: rgba(17,24,39,0.86);
                 --text: #e5e7eb;
                 --muted: #94a3b8;
-                --accent: #22d3ee;
+                --accent: #fbbf24;
                 --border: #1f2937;
             }
             .stApp {
@@ -283,7 +283,7 @@ def handle_tts(text: str):
 
 
 # Layout
-st.title("🎓 Student–Teacher AI (Streamlit)")
+st.title("🎓 Real Student and Teacher Agents")
 st.caption("Chat between a curious student and a helpful teacher. Backend untouched.")
 
 # UI copy blocks
@@ -414,3 +414,9 @@ if st.session_state.selected_topic_id and st.session_state.selected_topic_id != 
     render_chat(load_topic_messages(st.session_state.selected_topic_id))
 
 st.info("Run with: streamlit run app.py")
+
+# Footer badge
+st.markdown(
+    "<div style='text-align:center; padding:12px 0; color: var(--muted);'>Made with ❤️ by Soumyadip</div>",
+    unsafe_allow_html=True,
+)
