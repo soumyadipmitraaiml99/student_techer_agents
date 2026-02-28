@@ -110,7 +110,10 @@ def apply_theme(dark_mode: bool):
                 --card: rgba(17,24,39,0.86);
                 --text: #e5e7eb;
                 --muted: #94a3b8;
-                --accent: #fbbf24;
+                --accent: #a855f7;
+                --accent-strong: #8b5cf6;
+                --disabled-bg: #4b5563;
+                --disabled-text: #e5e7eb;
                 --border: #1f2937;
             }
             .stApp {
@@ -131,7 +134,13 @@ def apply_theme(dark_mode: bool):
             div.block-container { color: var(--text); backdrop-filter: blur(6px); }
             .stContainer { background: var(--card); border: 1px solid var(--border); border-radius: 12px; animation: fadeIn 0.3s ease; }
             .stButton>button, .stDownloadButton>button { background: var(--accent); color: #0b1220; border: none; }
-            .stButton>button:hover, .stDownloadButton>button:hover { filter: brightness(0.92); }
+            .stButton>button:hover, .stDownloadButton>button:hover { background: var(--accent-strong); color: #0b1220; }
+            .stButton>button:disabled, .stDownloadButton>button:disabled {
+                background: var(--disabled-bg);
+                color: var(--disabled-text);
+                border: 1px solid #6b7280;
+                opacity: 0.95;
+            }
             div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea {
                 background: var(--card);
                 color: var(--text);
@@ -152,6 +161,9 @@ def apply_theme(dark_mode: bool):
                 --text: #0f172a;
                 --muted: #475569;
                 --accent: #2563eb;
+                --accent-strong: #1d4ed8;
+                --disabled-bg: #cbd5e1;
+                --disabled-text: #475569;
                 --border: #e2e8f0;
             }
             .stApp {
@@ -172,7 +184,13 @@ def apply_theme(dark_mode: bool):
             div.block-container { color: var(--text); backdrop-filter: blur(6px); }
             .stContainer { background: var(--card); border: 1px solid var(--border); border-radius: 12px; animation: fadeIn 0.3s ease; }
             .stButton>button, .stDownloadButton>button { background: var(--accent); color: #ffffff; border: none; }
-            .stButton>button:hover, .stDownloadButton>button:hover { filter: brightness(0.96); }
+            .stButton>button:hover, .stDownloadButton>button:hover { background: var(--accent-strong); }
+            .stButton>button:disabled, .stDownloadButton>button:disabled {
+                background: var(--disabled-bg);
+                color: var(--disabled-text);
+                border: 1px solid #cbd5e1;
+                opacity: 0.95;
+            }
             div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea {
                 background: var(--card);
                 color: var(--text);
