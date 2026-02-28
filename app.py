@@ -32,6 +32,7 @@ for key, default in {
     "auto_run": False,
     "status": "idle",
     "manual_mode": False,
+    "selected_topic_id": None,
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -173,6 +174,7 @@ def reset_session_state():
     st.session_state.auto_run = False
     st.session_state.status = "idle"
     st.session_state.manual_mode = False
+    st.session_state.selected_topic_id = None
 
 
 def start_topic(topic: str, max_turns: int, manual_mode: bool = False):
@@ -273,6 +275,27 @@ def status_badge(label: str, color: str):
 
 apply_theme(False)
 
+# Sidebar with safe history (no raw JSON exposure)
+with st.sidebar:
+    st.header("Controls")
+    dark_mode = st.toggle("Dark mode", value=False)
+    apply_theme(dark_mode)
+
+    st.subheader("Topic history")
+    st.caption("Re-open or delete a previous topic. Messages show in read-only mode.")
+    topics_data = load_topics()
+    topic_options = {t["topic"] + " (" + t["topic_id"][:8] + ")": t["topic_id"] for t in topics_data.get("topics", [])}
+    selected_label = st.selectbox("Select topic", options=["<none>"] + list(topic_options.keys()))
+    if selected_label != "<none>":
+        st.session_state.selected_topic_id = topic_options[selected_label]
+        if st.button("Delete selected topic"):
+            delete_topic(st.session_state.selected_topic_id)
+            st.session_state.selected_topic_id = None
+            st.rerun()
+
+    st.divider()
+    st.caption("Live mode toggles are in the main area.")
+
 # Main inputs
 with st.container():
     col1, col2, col3, col4 = st.columns([3, 1, 1, 1.2])
@@ -357,5 +380,11 @@ if st.session_state.topic_id:
     if msgs:
         anim_spot = st.empty()
         typing_animation(anim_spot, msgs[-1]["message"][:400], delay=0.005)
+
+# Past conversation view (read-only)
+if st.session_state.selected_topic_id and st.session_state.selected_topic_id != st.session_state.topic_id:
+    st.subheader("Past conversation")
+    st.caption("Selected topic from history; read-only view.")
+    render_chat(load_topic_messages(st.session_state.selected_topic_id))
 
 st.info("Run with: streamlit run app.py")
