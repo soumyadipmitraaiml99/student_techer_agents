@@ -1,7 +1,5 @@
 import os
-import json
 import time
-import base64
 from pathlib import Path
 from datetime import datetime
 import streamlit as st
@@ -9,7 +7,7 @@ import streamlit as st
 # Backend imports (do not modify backend logic)
 from core.llm import call_llm
 from utils.topic_manager import create_topic, add_message, load_topics, save_topics
-from utils.memory_manager import append_message as update_memory, load_memory
+from utils.memory_manager import append_message as update_memory
 
 # Paths
 STUDENT_PROMPT_FILE = Path("agents/student.txt")
@@ -29,7 +27,6 @@ for key, default in {
     "stop_requested": False,
     "auto_run": False,
     "status": "idle",
-    "selected_topic_id": None,
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -151,44 +148,15 @@ def apply_theme(dark_mode: bool):
 
 
 def export_conversation_pdf(topic_id: str):
-    try:
-        from fpdf import FPDF
-    except Exception:
-        st.warning("Install fpdf to enable PDF export: pip install fpdf")
-        return
-
-    messages = load_topic_messages(topic_id)
-    if not messages:
-        st.info("No messages to export.")
-        return
-
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt=f"Conversation: {topic_id}", ln=True)
-    for msg in messages:
-        role = msg.get("role", "")
-        content = msg.get("message", "")
-        pdf.multi_cell(0, 10, txt=f"{role}: {content}")
-        pdf.ln(2)
-
-    pdf_bytes = pdf.output(dest="S").encode("latin-1")
-    b64 = base64.b64encode(pdf_bytes).decode()
-    href = f'<a href="data:application/pdf;base64,{b64}" download="conversation.pdf">Download PDF</a>'
-    st.markdown(href, unsafe_allow_html=True)
+    return
 
 
 def save_uploaded_pdf(uploaded_file):
-    if uploaded_file is None:
-        return None
-    file_path = UPLOAD_DIR / uploaded_file.name
-    with open(file_path, "wb") as f:
-        f.write(uploaded_file.read())
-    return file_path
+    return None
 
 
 def list_uploaded_pdfs():
-    return sorted([p.name for p in UPLOAD_DIR.glob("*.pdf")])
+    return []
 
 
 def start_topic(topic: str, max_turns: int):
@@ -254,41 +222,15 @@ def process_next_turn():
 
 
 def render_memory_viewer():
-    mem = load_memory()
-    with st.expander("Memory viewer", expanded=False):
-        st.json(mem)
+    return
 
 
 def handle_voice_input():
-    st.markdown("### Optional voice input (Whisper)")
-    audio_file = st.file_uploader("Upload audio (wav/mp3)", type=["wav", "mp3"], key="audio_upload")
-    text_out = None
-    if audio_file is not None:
-        try:
-            import whisper  # optional
-            model = whisper.load_model("base")
-            audio_path = Path("/tmp") / audio_file.name
-            with open(audio_path, "wb") as f:
-                f.write(audio_file.read())
-            result = model.transcribe(str(audio_path))
-            text_out = result.get("text", "")
-            st.success("Transcription complete.")
-        except Exception as exc:  # pragma: no cover - optional path
-            st.warning(f"Whisper not available: {exc}")
-    return text_out
+    return None
 
 
 def handle_tts(text: str):
-    if not text:
-        return
-    try:
-        import pyttsx3  # optional
-        engine = pyttsx3.init()
-        engine.say(text)
-        engine.runAndWait()
-        st.success("Played TTS locally.")
-    except Exception as exc:  # pragma: no cover - optional path
-        st.warning(f"TTS not available: {exc}")
+    return
 
 
 # Layout
@@ -298,12 +240,7 @@ st.caption("Chat between a curious student and a helpful teacher. Backend untouc
 # UI copy blocks
 st.markdown(
     """
-    **What this does:** spins up a lightweight practice room where an AI student and teacher swap turns on your topic. Start a topic, let them iterate, and export the dialogue when done.
-
-    **How to use:**
-    - Pick a topic and max turns, then hit Start Topic.
-    - Watch the live exchange; stop early if you need to.
-    - View past topics or export the current one as PDF.
+    Start a topic, set a turn limit, and watch the student/teacher exchange. JSON logs stay hidden and are only touched after you launch a topic.
     """
 )
 
@@ -315,44 +252,7 @@ def status_badge(label: str, color: str):
         unsafe_allow_html=True,
     )
 
-# Sidebar
-with st.sidebar:
-    st.header("Controls")
-    dark_mode = st.toggle("Dark mode", value=False)
-    apply_theme(dark_mode)
-
-    st.subheader("Topic history")
-    st.caption("Re-open, review, or delete any previous topic thread. Select one to inspect or export.")
-    topics_data = load_topics()
-    topic_options = {t["topic"] + " (" + t["topic_id"][:8] + ")": t["topic_id"] for t in topics_data.get("topics", [])}
-    selected_label = st.selectbox("Select topic", options=["<none>"] + list(topic_options.keys()))
-    if selected_label != "<none>":
-        st.session_state.selected_topic_id = topic_options[selected_label]
-        if st.button("Delete selected topic"):
-            delete_topic(st.session_state.selected_topic_id)
-            st.session_state.selected_topic_id = None
-            st.rerun()
-
-    st.subheader("Upload PDFs (future RAG)")
-    st.caption("Uploads are stored locally; future versions may use them for retrieval-augmented replies.")
-    uploaded_pdf = st.file_uploader("Upload PDF", type=["pdf"], key="pdf_upload")
-    if uploaded_pdf:
-        saved = save_uploaded_pdf(uploaded_pdf)
-        if saved:
-            st.success(f"Saved to {saved}")
-            st.rerun()
-    st.caption("Uploaded files:")
-    for name in list_uploaded_pdfs():
-        st.text(f"• {name}")
-
-    st.divider()
-    st.subheader("Export conversation")
-    export_topic_id = st.session_state.selected_topic_id or st.session_state.topic_id
-    if st.button("Export as PDF"):
-        if export_topic_id:
-            export_conversation_pdf(export_topic_id)
-        else:
-            st.info("Select or start a topic first.")
+apply_theme(False)
 
 # Main inputs
 with st.container():
@@ -415,33 +315,5 @@ if st.session_state.topic_id:
     if msgs:
         anim_spot = st.empty()
         typing_animation(anim_spot, msgs[-1]["message"][:400], delay=0.005)
-
-# Past conversations view
-if st.session_state.selected_topic_id and st.session_state.selected_topic_id != st.session_state.topic_id:
-    st.subheader("Past conversation")
-    st.caption("Selected topic from history; read-only view.")
-    render_chat(load_topic_messages(st.session_state.selected_topic_id))
-
-render_memory_viewer()
-
-# Optional voice input/output
-with st.expander("Voice options", expanded=False):
-    st.caption("Optional transcription (Whisper) and text-to-speech. Both are local and optional.")
-    voice_text = handle_voice_input()
-    if voice_text:
-        st.text_area("Transcribed text", value=voice_text, height=80)
-    tts_text = st.text_input("Text to speak (TTS)")
-    if st.button("Play TTS"):
-        handle_tts(tts_text)
-
-with st.expander("Quick tips", expanded=False):
-    st.markdown(
-        """
-        - Start narrow: pick a focused topic so the exchange stays concise.
-        - Raise turns if you want deeper follow-ups; lower turns for rapid checks.
-        - Use topic history to compare how prompts evolve over time.
-        - Export after a good run to keep a snapshot of the dialogue.
-        """
-    )
 
 st.info("Run with: streamlit run app.py")
