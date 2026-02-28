@@ -1,0 +1,31 @@
+STUDENT–TEACHER AGENT CONVERSATION FLOW
+
+1. User provides a topic for study.
+2. Student agent reads:
+   - student.txt (role)
+   - shared_memory.json (conversation so far)
+   - user topic
+   and generates the first student question.
+
+3. Save the student's question to shared_memory.json.
+
+4. Teacher agent reads:
+   - teacher.txt (role)
+   - shared_memory.json
+   and generates an explanation.
+
+5. Save the teacher's answer to shared_memory.json.
+
+6. Loop starts:
+   - Student reads shared_memory.json
+   - Student generates follow-up question
+   - Save to memory
+   - Teacher reads shared_memory.json
+   - Teacher explains
+   - Save to memory
+
+7. Loop repeats for a fixed number of turns (e.g., 3–7 follow-ups).
+
+8. User can reset memory anytime.
+
+This system simulates a realistic study session between a student and a teacher.

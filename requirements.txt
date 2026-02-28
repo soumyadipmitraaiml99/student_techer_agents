@@ -1,0 +1,7 @@
+streamlit
+customtkinter
+python-dotenv
+requests
+fpdf
+pyttsx3
+# optional: whisper (for voice input)

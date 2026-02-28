@@ -1,0 +1,5 @@
+MODEL_NAME = llama-3.3-70b-versatile
+MEMORY_FILE = data/shared_memory.json
+MAX_TURNS = 10
+ROLE_STUDENT = agents/student.txt
+ROLE_TEACHER = agents/teacher.txt
