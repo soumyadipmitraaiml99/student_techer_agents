@@ -31,6 +31,7 @@ for key, default in {
     "stop_requested": False,
     "auto_run": False,
     "status": "idle",
+    "manual_mode": False,
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -163,7 +164,18 @@ def list_uploaded_pdfs():
     return []
 
 
-def start_topic(topic: str, max_turns: int):
+def reset_session_state():
+    st.session_state.topic_id = None
+    st.session_state.topic = ""
+    st.session_state.max_turns = 6
+    st.session_state.turn_count = 0
+    st.session_state.stop_requested = False
+    st.session_state.auto_run = False
+    st.session_state.status = "idle"
+    st.session_state.manual_mode = False
+
+
+def start_topic(topic: str, max_turns: int, manual_mode: bool = False):
     ensure_topic_store()
     ensure_memory_store()
     st.session_state.topic_id = create_topic(topic, max_turns)
@@ -171,8 +183,9 @@ def start_topic(topic: str, max_turns: int):
     st.session_state.max_turns = max_turns
     st.session_state.turn_count = 0
     st.session_state.stop_requested = False
-    st.session_state.auto_run = True
+    st.session_state.auto_run = not manual_mode
     st.session_state.status = "running"
+    st.session_state.manual_mode = manual_mode
 
     student_prompt = read_prompt(STUDENT_PROMPT_FILE)
     student_msg = call_llm([
@@ -262,7 +275,7 @@ apply_theme(False)
 
 # Main inputs
 with st.container():
-    col1, col2, col3 = st.columns([3, 1, 1])
+    col1, col2, col3, col4 = st.columns([3, 1, 1, 1.2])
     with col1:
         topic_text = st.text_input("Topic", value=st.session_state.topic)
     with col2:
@@ -271,18 +284,40 @@ with st.container():
         st.write(" ")
         start_clicked = st.button("Start Topic", use_container_width=True)
         stop_clicked = st.button("Stop Topic", use_container_width=True)
+    with col4:
+        manual_mode = st.toggle("Manual steps", value=st.session_state.manual_mode, help="If on, turns advance only when you click Step once.")
+        st.session_state.manual_mode = manual_mode
+        step_clicked = st.button("Step once", use_container_width=True, disabled=not st.session_state.topic_id)
+        resume_clicked = st.button("Resume auto", use_container_width=True, disabled=not st.session_state.topic_id)
+        reset_clicked = st.button("Reset session", use_container_width=True)
 
     if start_clicked:
         if not topic_text.strip():
             st.warning("Enter a topic first.")
         else:
-            start_topic(topic_text.strip(), int(max_turns))
+            start_topic(topic_text.strip(), int(max_turns), manual_mode=st.session_state.manual_mode)
             st.rerun()
 
     if stop_clicked:
         st.session_state.stop_requested = True
         st.session_state.auto_run = False
         st.session_state.status = "stopped"
+
+    if reset_clicked:
+        reset_session_state()
+        st.rerun()
+
+    if step_clicked and st.session_state.topic_id:
+        st.session_state.auto_run = False
+        st.session_state.stop_requested = False
+        process_next_turn()
+        st.rerun()
+
+    if resume_clicked and st.session_state.topic_id:
+        st.session_state.stop_requested = False
+        st.session_state.auto_run = True
+        st.session_state.status = "running"
+        st.rerun()
 
 # Status and context strip
 status_colors = {
@@ -300,9 +335,10 @@ with st.container(border=True):
         st.markdown(f"**Turn:** {st.session_state.turn_count}/{st.session_state.max_turns}")
     with c3:
         topic_label = st.session_state.topic or "—"
-        st.markdown(f"**Active topic:** {topic_label}")
+        mode = "Manual" if st.session_state.manual_mode else "Auto"
+        st.markdown(f"**Active topic:** {topic_label} &nbsp;|&nbsp; **Mode:** {mode}")
 
-st.info("Tip: keep max turns modest (6-10) for quicker iterations. You can stop anytime; export stays available even after stopping.")
+st.info("Tip: keep max turns modest (6-10) for quicker iterations. You can stop or step manually anytime.")
 
 # Auto-run loop (one iteration per rerun)
 if st.session_state.auto_run and st.session_state.topic_id:
