@@ -102,17 +102,30 @@ def apply_theme(dark_mode: bool):
             """
             <style>
             :root {
-                --bg: #0f172a;
-                --card: #111827;
+                --bg: #0b1220;
+                --card: rgba(17,24,39,0.86);
                 --text: #e5e7eb;
                 --muted: #94a3b8;
                 --accent: #22d3ee;
                 --border: #1f2937;
             }
-            .stApp { background-color: var(--bg); color: var(--text); }
+            .stApp {
+                color: var(--text);
+                background: radial-gradient(120% 120% at 20% 20%, rgba(34,211,238,0.08), transparent),
+                            radial-gradient(100% 100% at 80% 10%, rgba(99,102,241,0.08), transparent),
+                            linear-gradient(160deg, #0b1220 0%, #0f172a 50%, #0b1220 100%);
+            }
+            .stApp::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                background: url("https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1600&q=60") center/cover no-repeat;
+                opacity: 0.08;
+                pointer-events: none;
+            }
             [data-testid="stSidebar"] { background-color: var(--card); color: var(--text); }
-            div.block-container { color: var(--text); }
-            .stContainer { background: var(--card); }
+            div.block-container { color: var(--text); backdrop-filter: blur(6px); }
+            .stContainer { background: var(--card); border: 1px solid var(--border); border-radius: 12px; animation: fadeIn 0.3s ease; }
             .stButton>button, .stDownloadButton>button { background: var(--accent); color: #0b1220; border: none; }
             .stButton>button:hover, .stDownloadButton>button:hover { filter: brightness(0.92); }
             div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea {
@@ -120,6 +133,7 @@ def apply_theme(dark_mode: bool):
                 color: var(--text);
                 border-color: var(--border);
             }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
             </style>
             """,
             unsafe_allow_html=True,
@@ -129,17 +143,30 @@ def apply_theme(dark_mode: bool):
             """
             <style>
             :root {
-                --bg: #f8fafc;
-                --card: #ffffff;
+                --bg: #f6f8fb;
+                --card: rgba(255,255,255,0.9);
                 --text: #0f172a;
                 --muted: #475569;
                 --accent: #2563eb;
                 --border: #e2e8f0;
             }
-            .stApp { background-color: var(--bg); color: var(--text); }
+            .stApp {
+                color: var(--text);
+                background: radial-gradient(120% 120% at 15% 20%, rgba(37,99,235,0.06), transparent),
+                            radial-gradient(100% 100% at 85% 10%, rgba(16,185,129,0.06), transparent),
+                            linear-gradient(180deg, #f6f8fb 0%, #eef2ff 100%);
+            }
+            .stApp::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                background: url("https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1600&q=60") center/cover no-repeat;
+                opacity: 0.06;
+                pointer-events: none;
+            }
             [data-testid="stSidebar"] { background-color: var(--card); color: var(--text); }
-            div.block-container { color: var(--text); }
-            .stContainer { background: var(--card); }
+            div.block-container { color: var(--text); backdrop-filter: blur(6px); }
+            .stContainer { background: var(--card); border: 1px solid var(--border); border-radius: 12px; animation: fadeIn 0.3s ease; }
             .stButton>button, .stDownloadButton>button { background: var(--accent); color: #ffffff; border: none; }
             .stButton>button:hover, .stDownloadButton>button:hover { filter: brightness(0.96); }
             div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea {
@@ -147,6 +174,7 @@ def apply_theme(dark_mode: bool):
                 color: var(--text);
                 border-color: var(--border);
             }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
             </style>
             """,
             unsafe_allow_html=True,
@@ -272,8 +300,6 @@ def status_badge(label: str, color: str):
         f"{label}</div>",
         unsafe_allow_html=True,
     )
-
-apply_theme(False)
 
 # Sidebar with safe history (no raw JSON exposure)
 with st.sidebar:
