@@ -37,6 +37,10 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
+# Track active theme choice in session
+if "dark_mode_active" not in st.session_state:
+    st.session_state.dark_mode_active = False
+
 
 # Helpers
 @st.cache_data(show_spinner=False)
@@ -304,7 +308,8 @@ def status_badge(label: str, color: str):
 # Sidebar with safe history (no raw JSON exposure)
 with st.sidebar:
     st.header("Controls")
-    dark_mode = st.toggle("Dark mode", value=False)
+    dark_mode = st.toggle("Dark mode", value=st.session_state.dark_mode_active)
+    st.session_state.dark_mode_active = dark_mode
     apply_theme(dark_mode)
 
     st.subheader("Topic history")
@@ -415,8 +420,11 @@ if st.session_state.selected_topic_id and st.session_state.selected_topic_id != 
 
 st.info("Run with: streamlit run app.py")
 
-# Footer badge
+# Footer badge (adaptive to theme)
+footer_color = "#0f172a" if not st.session_state.get("dark_mode_active", False) else "#e5e7eb"
 st.markdown(
-    "<div style='text-align:center; padding:12px 0; color: var(--muted);'>Made with ❤️ by Soumyadip</div>",
+    f"<div style='text-align:center; padding:18px 0; font-size:20px; font-weight:700; color:{footer_color}; letter-spacing:0.5px;'>"
+    "MADE WITH ❤️ BY SOUMYADIP"
+    "</div>",
     unsafe_allow_html=True,
 )
